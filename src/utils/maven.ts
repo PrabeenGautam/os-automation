@@ -13,7 +13,7 @@ export function isActionBuildOrTest(cmd: string): "build" | "test" {
 
 // Wrap -D flags that contain dots in quotes, to avoid shell issues
 export function quoteDFlagsWithDots(cmd: string): string {
-  return cmd.replace(/(^|\s)(-D[^\s"]+)/g, (_m, pre, flag) => {
+  return cmd.replace(/(^|\s)(-D(?:[^\s$]|\$\{\{[^}]*\}\}|\$(?!\{\{))+)/g, (_m, pre, flag) => {
     if (flag.startsWith('"') && flag.endsWith('"')) {
       return `${pre}${flag}`;
     }
