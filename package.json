@@ -1,7 +1,7 @@
 {
   "name": "os-automation",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
   "type": "module",
   "main": "dist/index.js",
   "files": [
@@ -11,6 +11,7 @@
     "osm": "dist/index.js"
   },
   "scripts": {
+    "prepublishOnly": "npm run build",
     "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
     "start": "node dist/index.js --help",
     "fix": "node dist/index.js",
@@ -32,5 +33,21 @@
     "tsc-alias": "^1.8.16",
     "tsx": "^4.20.6",
     "typescript": "^5.9.2"
-  }
+  },
+  "description": "CLI tool for automating OS workflows",
+  "keywords": [
+    "cli",
+    "automation",
+    "os"
+  ],
+  "author": "Prabin Gautam",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PrabeenGautam/os-automation.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PrabeenGautam/os-automation/issues"
+  },
+  "homepage": "https://github.com/PrabeenGautam/os-automation#readme"
 }
