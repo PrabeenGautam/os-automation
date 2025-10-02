@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2023"],
+    "strict": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "plugins": [{ "name": "@yaml-js/typescript" }]
+  },
+  "include": ["src/**/*.ts"],
+  "tsc-alias": {
+    "resolveFullPaths": true
+  }
+}
