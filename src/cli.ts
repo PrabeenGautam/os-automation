@@ -55,5 +55,5 @@ export async function run(argv: string[]) {
     return;
   }
 
-  `Done. Files changed: ${changedCount}/${files.length}`;
+  console.log(`Done. Files changed: ${changedCount}/${files.length}`);
 }

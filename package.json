@@ -1,11 +1,14 @@
 {
-  "name": "os-matrix-upgrader",
+  "name": "os-automation",
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "bin": {
-    "ghwf": "dist/index.js",
-    "osfix": "dist/index.js"
+    "osm": "dist/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
