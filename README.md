@@ -15,6 +15,13 @@ Its main role is to **add missing OS entries** to workflow matrices and apply re
 
 ---
 
+## Tested Environment
+
+- Windows 11 Pro
+- Node JS v22
+
+---
+
 ## Installation
 
 ```bash
