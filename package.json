@@ -15,7 +15,8 @@
     "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
     "start": "node dist/index.js --help",
     "fix": "node dist/index.js",
-    "dev": "tsx watch --clear-screen=true ./src/index.ts"
+    "dev": "tsx watch --clear-screen=true ./src/index.ts",
+    "publish": "npm publish"
   },
   "dependencies": {
     "commander": "^14.0.1",
