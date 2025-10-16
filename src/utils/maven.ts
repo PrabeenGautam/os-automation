@@ -11,6 +11,26 @@ export function isActionBuildOrTest(cmd: string): "build" | "test" {
   return "build";
 }
 
+export function hasBatchModeFlag(cmd: string): boolean {
+  return /\s(-B|--batch-mode)\b/.test(cmd);
+}
+
+export function hasNoTransferProgressFlag(cmd: string): boolean {
+  return /\s(-ntp|--no-transfer-progress)\b/.test(cmd);
+}
+
+export function addBatchModeFlag(cmd: string): string {
+  if (hasBatchModeFlag(cmd)) return cmd;
+  // Insert after 'mvn' or 'mvnw' command
+  return cmd.replace(/((?:^|[\s./\\])(?:mvnw?|mvn(?:\.cmd|\.bat)?))/i, "$1 --batch-mode");
+}
+
+export function addNoTransferProgressFlag(cmd: string): string {
+  if (hasNoTransferProgressFlag(cmd)) return cmd;
+  // Insert after 'mvn' or 'mvnw' command (and batch mode if present)
+  return cmd.replace(/((?:^|[\s./\\])(?:mvnw?|mvn(?:\.cmd|\.bat)?)(?:\s+(?:-B|--batch-mode))?)/i, "$1 -ntp");
+}
+
 // Wrap -D flags that contain dots in quotes, to avoid shell issues
 export function quoteDFlagsWithDots(cmd: string): string {
   return cmd.replace(/(^|\s)(-D(?:[^\s$]|\$\{\{[^}]*\}\}|\$(?!\{\{))+)/g, (_m, pre, flag) => {

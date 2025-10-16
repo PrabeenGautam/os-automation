@@ -1,6 +1,13 @@
 import { Job, JobWithStrategy, Matrix, Step } from "./types";
 import { OS_CANDIDATES, LATEST_OS, getExistingOSValues } from "./utils/os";
-import { isMavenCommand, isActionBuildOrTest, quoteDFlagsWithDots, addLogFlag } from "./utils/maven";
+import {
+  isMavenCommand,
+  isActionBuildOrTest,
+  quoteDFlagsWithDots,
+  addLogFlag,
+  addBatchModeFlag,
+  addNoTransferProgressFlag,
+} from "./utils/maven";
 import { ensureWindowsPrep, logsAndReportsUploadSteps } from "./utils/artifacts";
 import { checkWorkflowLogs, isJavaPresent } from "./utils/checker";
 
@@ -104,10 +111,13 @@ export function onMutateJob(job: Job): { job: Job; changed: boolean } {
     if (!isMavenCommand(originalRun)) continue;
 
     // Quote -D flags with dots to resolve unknown lifecycle issue
-    const quoted = quoteDFlagsWithDots(originalRun);
+    const dotQuoted = quoteDFlagsWithDots(originalRun);
+
+    // Add -ntp, -batch-mode if not already present
+    const cmdWithBatchNtpFlag = addNoTransferProgressFlag(addBatchModeFlag(dotQuoted));
 
     // Add -l "logNameExpr" if not already present
-    const action = isActionBuildOrTest(quoted);
+    const action = isActionBuildOrTest(cmdWithBatchNtpFlag);
     const parts: string[] = ["maven", action];
     if (hasJava) parts.push(`java\${{ matrix.java }}`);
 
@@ -115,7 +125,7 @@ export function onMutateJob(job: Job): { job: Job; changed: boolean } {
     const logNameExpr = parts.join("-") + ".log";
 
     // Ensure -l "<logname>"
-    const withLog = addLogFlag(quoted, logNameExpr);
+    const withLog = addLogFlag(cmdWithBatchNtpFlag, logNameExpr);
     if (withLog !== originalRun) {
       step.run = withLog;
       changed = true;
