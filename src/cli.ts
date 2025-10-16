@@ -1,16 +1,22 @@
 import { Command } from "commander";
 import fg from "fast-glob";
 import { readFileSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { readYaml, writeYaml } from "./utils/yaml";
 import { mutateDoc } from "./mutator";
 
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Read version from package.json
 function getVersion(): string {
   try {
     const packageJson = JSON.parse(readFileSync(join(__dirname, "../package.json"), "utf-8"));
-    return packageJson.version || "1.0.0";
+    return packageJson.version || "unknown";
   } catch {
-    return "1.0.0";
+    return "unknown";
   }
 }
 
