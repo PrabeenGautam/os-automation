@@ -52,6 +52,7 @@ osm [options]
 | `-p, --pattern <glob>` | Glob pattern for workflow files to process     | `{.github/workflows,src/test}/**/*.{yml,yaml}` |
 | `-d, --dry-run`        | Show what would change, but do not write files | `false`                                        |
 | `-l, --list`           | List matching files and exit                   | `false`                                        |
+| `-v, --version`        | Output the current version                     | -                                        |
 
 ---
 

@@ -1,7 +1,18 @@
 import { Command } from "commander";
 import fg from "fast-glob";
+import { readFileSync } from "fs";
+import { join } from "path";
 import { readYaml, writeYaml } from "./utils/yaml";
 import { mutateDoc } from "./mutator";
+
+function getVersion(): string {
+  try {
+    const packageJson = JSON.parse(readFileSync(join(__dirname, "../package.json"), "utf-8"));
+    return packageJson.version || "1.0.0";
+  } catch {
+    return "1.0.0";
+  }
+}
 
 export async function run(argv: string[]) {
   const program = new Command();
@@ -11,6 +22,7 @@ export async function run(argv: string[]) {
     .description(
       "Automate OS matrix updates, Windows fixes, and Maven log/artifact setup for GitHub Actions workflows."
     )
+    .version(getVersion(), "-v, --version", "Output the current version")
     .option("-p, --pattern <glob>", "Glob of workflow files to process", "{.github/workflows,src/test}/**/*.{yml,yaml}")
     .option("-d, --dry-run", "Show what would change but do not write files", false)
     .option("-l, --list", "List files that would be processed and exit", false)
