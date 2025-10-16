@@ -9,7 +9,7 @@ import {
   addNoTransferProgressFlag,
 } from "./utils/maven";
 import { ensureWindowsPrep, logsAndReportsUploadSteps } from "./utils/artifacts";
-import { checkWorkflowLogs, isJavaPresent } from "./utils/checker";
+import { checkWorkflowLogs, getJavaKey, isJavaPresent } from "./utils/checker";
 
 export function injectStepSpacing(steps: Step[]) {
   const result: any[] = [];
@@ -63,20 +63,19 @@ function ensureOsMatrix(originalMatrix: Matrix | undefined): { matrix: Matrix; c
   return { matrix, changed };
 }
 
-function getJobName(job: Job, hasJava: boolean) {
-  let baseName = job.name ?? "Build";
+function getJobName(job: Job, hasJava: boolean, javaKey: string) {
+  let baseName = job.name?.trim() ?? "Build";
+  const osExpr = "${{ matrix.os }}";
+  const javaExpr = javaKey ? `\${{ matrix.${javaKey} }}` : null;
 
-  const os = "${{ matrix.os }}";
-  const javaVersion = hasJava ? "Java: ${{ matrix.java }}" : null;
-
-  // Ensure OS
-  if (!baseName.includes(os)) {
-    baseName = `${baseName} - ${os}`;
+  // Ensure OS expression is included exactly once
+  if (!baseName.includes(osExpr)) {
+    baseName = `${baseName} - ${osExpr}`;
   }
 
   // Ensure Java
-  if (javaVersion && !baseName.includes("${{ matrix.java }}")) {
-    baseName = `${baseName} - ${javaVersion}`;
+  if (hasJava && javaExpr && !baseName.includes(javaExpr)) {
+    baseName = `${baseName} - Java: ${javaExpr}`;
   }
 
   return baseName;
@@ -84,6 +83,11 @@ function getJobName(job: Job, hasJava: boolean) {
 
 export function onMutateJob(job: Job): { job: Job; changed: boolean } {
   let changed = false;
+
+  // Defensive: ensure the job is an object
+  if (!job || typeof job !== "object") {
+    return { job, changed };
+  }
 
   job.strategy = job.strategy || {};
 
@@ -102,10 +106,12 @@ export function onMutateJob(job: Job): { job: Job; changed: boolean } {
     changed = true;
   }
 
-  const hasJava = isJavaPresent(job.strategy.matrix);
+  const hasJava = isJavaPresent(job.strategy?.matrix);
+  const { matrixExpression, key: javaKey } = getJavaKey(job.strategy?.matrix || {});
 
   for (const step of job.steps) {
-    if (typeof step?.run !== "string") continue;
+    if (!step || typeof step !== "object") continue;
+    if (typeof step.run !== "string") continue;
     const originalRun = step.run;
 
     if (!isMavenCommand(originalRun)) continue;
@@ -119,8 +125,8 @@ export function onMutateJob(job: Job): { job: Job; changed: boolean } {
     // Add -l "logNameExpr" if not already present
     const action = isActionBuildOrTest(cmdWithBatchNtpFlag);
     const parts: string[] = ["maven", action];
-    if (hasJava) parts.push(`java\${{ matrix.java }}`);
 
+    if (hasJava && matrixExpression) parts.push(`java${matrixExpression}`);
     parts.push("${{ matrix.os }}");
     const logNameExpr = parts.join("-") + ".log";
 
@@ -140,6 +146,7 @@ export function onMutateJob(job: Job): { job: Job; changed: boolean } {
     hasSurefireFailsafeUpload,
     hasJava,
     jobName: job.name,
+    matrixExpression,
   });
 
   if (uploadSteps && uploadSteps.length > 0) {
@@ -147,7 +154,7 @@ export function onMutateJob(job: Job): { job: Job; changed: boolean } {
     changed = true;
   }
 
-  job.name = getJobName(job, hasJava);
+  job.name = getJobName(job, hasJava, javaKey);
 
   return { job, changed };
 }

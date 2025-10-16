@@ -51,8 +51,9 @@ export function logsAndReportsUploadSteps(opts: {
   hasSurefireFailsafeUpload: boolean;
   hasJava?: boolean;
   jobName?: string;
+  matrixExpression?: string;
 }) {
-  const namePart = opts.hasJava ? "-${{ matrix.java }}" : "";
+  const namePart = opts.hasJava ? `-${opts.matrixExpression}` : "";
   const steps: Step[] = [];
 
   if (opts.hasLogUpload && opts.hasSurefireFailsafeUpload) {

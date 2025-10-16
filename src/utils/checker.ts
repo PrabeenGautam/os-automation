@@ -8,6 +8,16 @@ export function isJavaPresent(matrix: any): boolean {
   return false;
 }
 
+export function getJavaKey(matrix: any) {
+  let key = "java";
+  if (Object.prototype.hasOwnProperty.call(matrix, "java")) key = "java";
+  if (Object.prototype.hasOwnProperty.call(matrix, "java-version")) key = "java-version";
+  if (Object.prototype.hasOwnProperty.call(matrix, "jdk")) key = "jdk";
+
+  const matrixExpression = `\${{ matrix.${key} }}`;
+  return { key, matrixExpression };
+}
+
 export function hasGitConfig(steps: Step[], key: string): boolean {
   return steps.some((s) => typeof s.run === "string" && s.run.includes("git config") && s.run.includes(key));
 }
