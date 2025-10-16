@@ -63,8 +63,14 @@ function ensureOsMatrix(originalMatrix: Matrix | undefined): { matrix: Matrix; c
   return { matrix, changed };
 }
 
-function getJobName(job: Job, hasJava: boolean, javaKey: string) {
+function getJobName(job: Job, jobId: string, hasJava: boolean, javaKey: string) {
   let baseName = job.name?.trim() ?? "Build";
+
+  // Append index
+  if (jobId) {
+    baseName = `${baseName} - ${jobId.toLowerCase()}`;
+  }
+
   const osExpr = "${{ matrix.os }}";
   const javaExpr = javaKey ? `\${{ matrix.${javaKey} }}` : null;
 
@@ -81,11 +87,26 @@ function getJobName(job: Job, hasJava: boolean, javaKey: string) {
   return baseName;
 }
 
-export function onMutateJob(job: Job): { job: Job; changed: boolean } {
+export function onMutateJob(job: Job, jobId: string): { job: Job; changed: boolean } {
   let changed = false;
 
   // Defensive: ensure the job is an object
   if (!job || typeof job !== "object") {
+    return { job, changed };
+  }
+
+  let isJobMavenBased = false;
+  for (const step of job.steps) {
+    if (!step || typeof step !== "object") continue;
+    if (typeof step.run !== "string") continue;
+    if (isMavenCommand(step.run)) {
+      isJobMavenBased = true;
+      break;
+    }
+  }
+
+  if (!isJobMavenBased) {
+    console.log(`Skipping non-maven job: ${jobId}`);
     return { job, changed };
   }
 
@@ -97,17 +118,14 @@ export function onMutateJob(job: Job): { job: Job; changed: boolean } {
 
   job["runs-on"] = "${{ matrix.os }}";
 
-  if (osChanged) {
-    changed = true;
-  }
-
-  job.steps = job.steps ?? [];
-  if (ensureWindowsPrep(job)) {
-    changed = true;
-  }
-
   const hasJava = isJavaPresent(job.strategy?.matrix);
   const { matrixExpression, key: javaKey } = getJavaKey(job.strategy?.matrix || {});
+  job.name = getJobName(job, jobId, hasJava, javaKey);
+
+  if (osChanged) changed = true;
+
+  job.steps = job.steps ?? [];
+  if (ensureWindowsPrep(job)) changed = true;
 
   for (const step of job.steps) {
     if (!step || typeof step !== "object") continue;
@@ -154,8 +172,6 @@ export function onMutateJob(job: Job): { job: Job; changed: boolean } {
     changed = true;
   }
 
-  job.name = getJobName(job, hasJava, javaKey);
-
   return { job, changed };
 }
 
@@ -169,7 +185,7 @@ export function mutateDoc(doc: any): boolean {
   for (const [_jobId, job] of Object.entries<Job>(doc.jobs)) {
     if (dockerRegex.test(_jobId)) continue;
 
-    const { changed: isJobChanged } = onMutateJob(job);
+    const { changed: isJobChanged } = onMutateJob(job, _jobId);
     if (isJobChanged) changedAny = true;
   }
 
