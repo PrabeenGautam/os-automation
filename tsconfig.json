@@ -12,7 +12,7 @@
     "skipLibCheck": true,
     "plugins": [{ "name": "@yaml-js/typescript" }]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src", "tests"],
   "tsc-alias": {
     "resolveFullPaths": true
   }

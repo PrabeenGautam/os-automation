@@ -10,6 +10,7 @@ import {
 } from "./utils/maven";
 import { ensureWindowsPrep, logsAndReportsUploadSteps } from "./utils/artifacts";
 import { checkWorkflowLogs, getJavaKey, isJavaPresent } from "./utils/checker";
+import { upgradeActionsCacheSteps } from "./utils/actions";
 
 export function injectStepSpacing(steps: Step[]) {
   const result: any[] = [];
@@ -126,6 +127,15 @@ export function onMutateJob(job: Job, jobId: string): { job: Job; changed: boole
 
   job.steps = job.steps ?? [];
   if (ensureWindowsPrep(job)) changed = true;
+
+  const upgradeReport = upgradeActionsCacheSteps(job.steps, {
+    safeMode: true,
+    logger: (m) => console.debug(`[cache-upgrade][${jobId}] ${m}`),
+  });
+
+  if (upgradeReport.changed) {
+    changed = true;
+  }
 
   for (const step of job.steps) {
     if (!step || typeof step !== "object") continue;
