@@ -66,11 +66,11 @@ function ensureOsMatrix(originalMatrix: Matrix | undefined): { matrix: Matrix; c
 
 function getJobName(job: Job, jobId: string, hasJava: boolean, javaKey: string) {
   let baseName = job.name?.trim() ?? "Build";
-  const lowerJobId = jobId.toLowerCase();
 
-  // Append index
-  if (jobId && !baseName.includes(lowerJobId)) {
-    baseName = `${baseName} - ${lowerJobId}`;
+  // Ensure job ID is included
+  const regex = new RegExp(jobId, "i");
+  if (!regex.test(baseName)) {
+    baseName = `${baseName} - ${jobId}`;
   }
 
   const osExpr = "${{ matrix.os }}";
