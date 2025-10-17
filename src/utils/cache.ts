@@ -1,3 +1,5 @@
+import { Step } from "../types";
+
 export type CacheUpgradeOptions = {
   safeMode?: boolean; // true = skip pinned refs and SHAs
   logger?: (msg: string) => void;
@@ -11,14 +13,14 @@ export type CacheUpgradeDetail = {
 };
 
 export type CacheUpgradeResult = {
-  steps: any[];
+  steps: Step[];
   changed: boolean;
   upgrades: number;
   skips: number;
   details: CacheUpgradeDetail[];
 };
 
-export function upgradeActionsCacheSteps(steps: any[], options: CacheUpgradeOptions = {}): CacheUpgradeResult {
+export function upgradeActionsCacheSteps(steps: Step[], options: CacheUpgradeOptions = {}): CacheUpgradeResult {
   const { safeMode = true, logger = console.log } = options;
 
   const cacheActionRegex = /(^|\/)actions\/cache@(.+)$/;

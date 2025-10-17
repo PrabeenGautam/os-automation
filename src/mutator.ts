@@ -10,7 +10,8 @@ import {
 } from "./utils/maven";
 import { ensureWindowsPrep, logsAndReportsUploadSteps } from "./utils/artifacts";
 import { checkWorkflowLogs, getJavaKey, isJavaPresent } from "./utils/checker";
-import { upgradeActionsCacheSteps } from "./utils/actions";
+import { upgradeActionsCacheSteps } from "./utils/cache";
+import { upgradeSetupJavaSteps } from "./utils/java";
 
 export function injectStepSpacing(steps: Step[]) {
   const result: any[] = [];
@@ -135,6 +136,16 @@ export function onMutateJob(job: Job, jobId: string): { job: Job; changed: boole
   });
 
   if (upgradeReport.changed) {
+    changed = true;
+  }
+
+  const upgradeJava = upgradeSetupJavaSteps(job.steps, {
+    safeMode: true,
+    target: "v4",
+    logger: (m) => console.debug(`[java-upgrade][${jobId}] ${m}`),
+  });
+
+  if (upgradeJava.changed) {
     changed = true;
   }
 

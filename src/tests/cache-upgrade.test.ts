@@ -1,4 +1,4 @@
-import { upgradeActionsCacheSteps } from "../utils/actions";
+import { upgradeActionsCacheSteps } from "../utils/cache";
 
 describe("upgradeActionsCacheSteps", () => {
   test("upgrades v1 -> v4", () => {
