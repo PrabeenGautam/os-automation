@@ -7,6 +7,7 @@ import {
   addLogFlag,
   addBatchModeFlag,
   addNoTransferProgressFlag,
+  isVersionCmd,
 } from "./utils/maven";
 import { ensureWindowsPrep, logsAndReportsUploadSteps } from "./utils/artifacts";
 import { checkWorkflowLogs, getJavaKey, isJavaPresent } from "./utils/checker";
@@ -155,6 +156,7 @@ export function onMutateJob(job: Job, jobId: string): { job: Job; changed: boole
     const originalRun = step.run;
 
     if (!isMavenCommand(originalRun)) continue;
+    if (isVersionCmd(originalRun)) continue;
 
     // Quote -D flags with dots to resolve unknown lifecycle issue
     const dotQuoted = quoteDFlagsWithDots(originalRun);

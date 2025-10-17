@@ -5,6 +5,10 @@ export function isMavenCommand(cmd: string): boolean {
   return /(?:^|[\s./\\])(mvnw?|mvn(?:\.cmd|\.bat)?)(?=\s|$)/i.test(cmd);
 }
 
+export function isVersionCmd(cmd: string): boolean {
+  return /\s(-v|--version)\b/.test(cmd);
+}
+
 // Treat verify/package/install as "build"; test/surefire/failsafe as "test"
 export function isActionBuildOrTest(cmd: string): "build" | "test" {
   if (/\b(test|surefire|failsafe|integration[- ]?test)\b/i.test(cmd)) return "test";
